@@ -112,7 +112,7 @@ class QueryExpansion:
         """
         tokens = self.tokenize(query)
         candidates = self.get_candidate_expansion_terms(tokens, k)
-        candidates_sim = self.get_top_expansion_terms(tokens, candidates)
+        candidates_sim = self.get_similarity_pairs(tokens, candidates)
         def takeSecond(elem):
             return elem[1]
         sort = sorted(candidates_sim, key=takeSecond)[::-1]
