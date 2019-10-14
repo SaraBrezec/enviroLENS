@@ -5,6 +5,7 @@ from nltk.tokenize import word_tokenize
 
 
 
+
 class QueryExpansion:
     """Pre-retrieval kNN based approach for query expansion.
     Args:

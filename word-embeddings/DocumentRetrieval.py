@@ -1,6 +1,12 @@
 
 # DocumentRetrieval functions
 
+from gensim.models import KeyedVectors
+import string
+import numpy as np
+import collections
+import math
+
 
 def similarity(token, token_list, wv ):
     """Calculates similarity between token and list of tokens.
@@ -119,6 +125,7 @@ def top_positives(dictionary,n):
     return sorted_positives_top
 
 def probability_score(tokens,texts, probability_function,n, *args):
+    # final function, takes also probability_function probability_sum_weight, but doesnt give final result (used in probability_score_sum_weights)
     """Assigns score to documents based on probability_function metric.
     Args:
         tokens (list): List of tokens (tokenized query). If needed also extension (extension by summation of 2 consecutive words).
@@ -177,6 +184,7 @@ def probability_score(tokens,texts, probability_function,n, *args):
     return document_probability
 
 def probability_score_sum_weights(original_tokens, top_expansion, texts,n, alpha, wv): 
+    # final fuction
     """As probability_score only weighted.
         Args:
         original_tokens(list): List of strings. Tokenized original query. Usually also extension (extension by summation of 2 consecutive words)
@@ -248,6 +256,7 @@ def tfidf_sum_weight(probability,  token_frequency, n, idf, word, alpha, origina
     return tfidf_value
 
 def tfidf_score(tokens, texts, tfidf_function,n, *args):
+    #final function
     """Assigns score to documents based on tfidf_function metric.
     Args:
         tokens (list): List of tokens (tokenized query). If needed also extension (extension by summation of 2 consecutive words).
