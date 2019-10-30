@@ -1,4 +1,3 @@
-
 # DocumentRetrieval functions
 
 from gensim.models import KeyedVectors
@@ -124,14 +123,14 @@ def top_positives(dictionary,n):
         sorted_positives_top = sorted_positives
     return sorted_positives_top
 
-def probability_score(tokens,texts, probability_function,n, *args):
+def probability_score(tokens,texts, probability_function,m, *args):
     # final function, takes also probability_function probability_sum_weight, but doesnt give final result (used in probability_score_sum_weights)
     """Assigns score to documents based on probability_function metric.
     Args:
         tokens (list): List of tokens (tokenized query). If needed also extension (extension by summation of 2 consecutive words).
         texts (dict):  Keys represent document ids, values are document text. 
         probability_function (function): Metric function that calculates document relavance. Functions: probability_multiply, probability_sum. Require only first 4 arguments.
-        n (int): Number of returned tuples, sorted by highest scores.
+        m (int): Number of returned tuples (positive scores), sorted by highest scores. If m=o returns all.
         top_expansion (list): List of expanded words. Usually candidates (kNN expansion).
         alpha (float): Number between 0 and 1. Weight that emphasizes the difference between original query words and expansions. 
                        For alpha 0.5 all words have same weights (but not same values!), for alpha 1 expansion words have value 0. 
@@ -179,18 +178,21 @@ def probability_score(tokens,texts, probability_function,n, *args):
             break
         else:
             print("Error, metric function not defined.")
-            
-    document_probability = top_positives(document_probability,n)        
-    return document_probability
+     
+    if m == 0:
+        return [(k, v) for k, v in document_probability.items()] 
+    else:      
+        document_probability = top_positives(document_probability,m)        
+        return document_probability
 
-def probability_score_sum_weights(original_tokens, top_expansion, texts,n, alpha, wv): 
+def probability_score_sum_weights(original_tokens, top_expansion, texts,m, alpha, wv): 
     # final fuction
     """As probability_score only weighted.
         Args:
         original_tokens(list): List of strings. Tokenized original query. Usually also extension (extension by summation of 2 consecutive words)
         top_expansion (list): List of expanded words. Usually candidates (kNN expansion).
         texts (dict):  Keys represent document ids, values are document text.
-        n (int): Number of returned tuples, sorted by highest scores.
+        m (int): Number of returned tuples (positive scores), sorted by highest scores. If m=o returns all.
         alpha (float): Number between 0 and 1. Weight that emphasizes the difference between original query words and expansions. 
                        For alpha 0.5 all words have same weights (but not same values!), for alpha 1 expansion words have value 0. 
                        For alpha -1 values equal to cosine similarity to query words. 
@@ -199,7 +201,7 @@ def probability_score_sum_weights(original_tokens, top_expansion, texts,n, alpha
         document_score (list): Tuples of document ids and scores that measure document relavance. Returns n tuples with highest score.
     """
     tokens = original_tokens+top_expansion
-    document_score = probability_score(tokens,texts, probability_sum_weight,n, top_expansion, alpha, wv)
+    document_score = probability_score(tokens,texts, probability_sum_weight,m, top_expansion, alpha, wv)
     return document_score
 
 def number_documents_tokens_appear(tokens,texts):
@@ -255,14 +257,14 @@ def tfidf_sum_weight(probability,  token_frequency, n, idf, word, alpha, origina
     tfidf_value = probability+((token_frequency/n)*idf)*word_value( word, alpha, original_tokens, top_expansion, wv)
     return tfidf_value
 
-def tfidf_score(tokens, texts, tfidf_function,n, *args):
+def tfidf_score(tokens, texts, tfidf_function,m, *args):
     #final function
     """Assigns score to documents based on tfidf_function metric.
     Args:
         tokens (list): List of tokens (tokenized query). If needed also extension (extension by summation of 2 consecutive words).
         texts (dict):  Keys represent document ids, values are document text. 
         probability_function (function): Metric function that calculates document relavance. Functions: tfidf_sum; require only first 4 arguments, tfidf_sum_weight; require all arguments.
-        n (int): Number of returned tuples, sorted by highest scores.
+        m (int): Number of returned tuples (positive scores), sorted by highest scores. If m=o returns all.
         top_expansion (list): List of expanded words. Usually candidates (kNN expansion).
         alpha (float): Number between 0 and 1. Weight that emphasizes the difference between original query words and expansions. 
                        For alpha 0.5 all words have same weights (but not same values!), for alpha 1 expansion words have value 0. 
@@ -315,5 +317,8 @@ def tfidf_score(tokens, texts, tfidf_function,n, *args):
             break
         document_probability.update({k: probability})
         
-    document_probability = top_positives(document_probability,n)
-    return document_probability, not_appear
+    if m == 0:
+        return [(k, v) for k, v in document_probability.items()] 
+    else:      
+        document_probability = top_positives(document_probability,m)        
+        return document_probability
