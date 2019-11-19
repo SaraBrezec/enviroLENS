@@ -46,19 +46,19 @@ def index():
 @bp.route('/retrieval', methods=['GET', 'POST'])
 def retrieval():
     # a je treba tukaj kje locit a pride stvar od userja al od drugega microservica
-#text = None
+
     tokens = None
-    tfidf_function = None
+    #tfidf_function = None
     m = None
     if request.method == 'GET':
-        #text= request.args.get('text', default='', type=str)
+        
         tokens=request.args.get('tokens', default='', type=str)
-        tfidf_function= request.args.get('tfidf_function', default='', type=str)
+       # tfidf_function= request.args.get('tfidf_function', default='', type=str)
         m= request.args.get('m', default='', type=str)
     elif request.method == 'POST':
-        #text = request.json['text']
+        
         tokens = request.json['tokens']
-        tfidf_function = request.json['tfidf_function']
+       # tfidf_function = request.json['tfidf_function']
         m = request.json['m']
     else:
         # TODO: log exception
@@ -67,7 +67,7 @@ def retrieval():
     try:
         docs = model.db_query(tokens)
         texts = change_dict_structure(docs)
-        tfidf_score = tfidf_score(tokens, texts, tfidf_function,m)
+        tfidf_score = tfidf_score_str(tokens,texts,'tfidf_sum',m)
         metadata = model.db_return_docs_metadata(tfidf_score)
 
     except Exception as e:

@@ -18,7 +18,7 @@ def create_app(args=None):
         app.config.update(
             HOST=args["host"],
             PORT=args["port"],
-            # TODO: add additional enviroments
+            # tako je ok?
         )
 
     # set the service environment
