@@ -5,7 +5,21 @@ import string
 import numpy as np
 import collections
 import math
-import time
+
+
+def change_dict_structure(dict_list):
+    """Takes list of dicts from db_query and changes to dict with key=id, value = text (used for metrices).
+    Args:
+        dict_list (list): List of dictionaries from db_query.
+    Returns:
+        texts (dictionary): Dictionary with document IDs as keys and document text as values.
+    """
+    texts = {}
+    for dict in dict_list:
+        doc_id = dict.get('document_id')
+        text = dict.get('fulltext_cleaned')
+        texts.update({doc_id: text})
+    return texts
 
 
 def similarity(token, token_list, wv ):
@@ -17,20 +31,17 @@ def similarity(token, token_list, wv ):
     Returns:
         avreage_similarity (float): Number that signifes the similarity of token to token_list words.
     """
-    start = time.time()
+
     similarity = 0
     num_of_tokens = 0
     for toks in token_list:
         # check if the token is in the vocabulary
-        if toks in wv.vocab:
+
+        if toks in wv.vocab.keys():
             num_of_tokens += 1
             similarity += wv.similarity(toks, token) 
             avreage_similarity = similarity/num_of_tokens
-    end = time.time()
-    #print('S')
-    #print(end - start)
     return avreage_similarity
-    
 
 
 def probability_multiply(probability, token_frequency, n):
@@ -264,6 +275,13 @@ def tfidf_sum_weight(probability,  token_frequency, n, idf, word, alpha, origina
     tfidf_value = probability+((token_frequency/n)*idf)*word_value( word, alpha, original_tokens, top_expansion, wv)
     return tfidf_value
 
+
+def tfidf_score_str(tokens,texts,tfidf_function_name,m,*args):
+    # TO DO
+    """Takes function name as input, returns function"""
+        if tfidf_function_name == 'tfidf_sum':
+            return tfidf_score(tokens,texts,tfidf_sum,m)
+
 def tfidf_score(tokens, texts, tfidf_function,m, *args):
     #final function
     """Assigns score to documents based on tfidf_function metric.
@@ -284,7 +302,7 @@ def tfidf_score(tokens, texts, tfidf_function,m, *args):
     #args[0] == top_expansion
     #args[1] == alpha
     #args[2] == wv
-    start = time.time()
+
     break_loop = False
     if len(args):
         tokens_together = tokens+args[0]
@@ -294,21 +312,17 @@ def tfidf_score(tokens, texts, tfidf_function,m, *args):
     filtered_nb_docs_tokens_appeared = [elt for elt in nb_docs_tokens_appeared if not elt == 0]
     not_appear = []
     appear = []
-    s1 = time.time()
 
     for i in range(len(nb_docs_tokens_appeared)):
-        # sort tokens into two lists:
-        # those that do not appear in documents and those that do
+
         if nb_docs_tokens_appeared[i] == 0:
             not_appear.append(tokens_together[i])
         else:
             appear.append(tokens_together[i])    
     l = len(texts)
-    s2 = time.time()
 
     document_probability = {}
     for k, v in texts.items():
-        s2 = time.time()
 
         n = len(v)
         probability = 0
@@ -328,10 +342,8 @@ def tfidf_score(tokens, texts, tfidf_function,m, *args):
                 else:
                     print("Error, number of arguments does not match")
                     break_loop = True
-                    break
-        s3 = time.time()
-       # print("M3")
-       # print(s3 - s2) 
+
+                    break 
         if break_loop:
             break
         document_probability.update({k: probability})
@@ -340,4 +352,6 @@ def tfidf_score(tokens, texts, tfidf_function,m, *args):
         return [(k, v) for k, v in document_probability.items()] 
     else:      
         document_probability = top_positives(document_probability,m)        
+
         return document_probability
+
